@@ -23,7 +23,7 @@ type User struct {
 	APIKey     string     `json:"api_key,omitempty"`
 	TwoFA      bool       `json:"two_factor_authentication_enabled,omitempty"`
 	Betas      []string   `json:"betas,omitempty"`
-	Accounts   []Account  `json:"organizations,omitempty"`
+	//Accounts   []Account  `json:"organizations,omitempty"`
 }
 
 // UserResponse wraps a response containing User accounts.
@@ -103,58 +103,5 @@ func (api *API) UserDetails(ctx context.Context) (User, error) {
 		return User{}, fmt.Errorf("%s: %w", errUnmarshalError, err)
 	}
 
-	return r.Result, nil
-}
-
-// UpdateUser updates the properties of the given user.
-//
-// API reference: https://api.cloudflare.com/#user-update-user
-func (api *API) UpdateUser(ctx context.Context, user *User) (User, error) {
-	var r UserResponse
-	res, err := api.makeRequestContext(ctx, http.MethodPatch, "/user", user)
-	if err != nil {
-		return User{}, err
-	}
-
-	err = json.Unmarshal(res, &r)
-	if err != nil {
-		return User{}, fmt.Errorf("%s: %w", errUnmarshalError, err)
-	}
-
-	return r.Result, nil
-}
-
-// UserBillingProfile returns the billing profile of the user.
-//
-// API reference: https://api.cloudflare.com/#user-billing-profile
-func (api *API) UserBillingProfile(ctx context.Context) (UserBillingProfile, error) {
-	var r userBillingProfileResponse
-	res, err := api.makeRequestContext(ctx, http.MethodGet, "/user/billing/profile", nil)
-	if err != nil {
-		return UserBillingProfile{}, err
-	}
-
-	err = json.Unmarshal(res, &r)
-	if err != nil {
-		return UserBillingProfile{}, fmt.Errorf("%s: %w", errUnmarshalError, err)
-	}
-
-	return r.Result, nil
-}
-
-// UserBillingHistory return the billing history of the user
-//
-// API reference: https://api.cloudflare.com/#user-billing-history-billing-history-details
-func (api *API) UserBillingHistory(ctx context.Context, pageOpts UserBillingOptions) ([]UserBillingHistory, error) {
-	uri := buildURI("/user/billing/history", pageOpts)
-	res, err := api.makeRequestContext(ctx, http.MethodGet, uri, nil)
-	if err != nil {
-		return []UserBillingHistory{}, err
-	}
-	var r UserBillingHistoryResponse
-	err = json.Unmarshal(res, &r)
-	if err != nil {
-		return []UserBillingHistory{}, fmt.Errorf("%s: %w", errUnmarshalError, err)
-	}
 	return r.Result, nil
 }

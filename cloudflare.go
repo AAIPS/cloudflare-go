@@ -144,24 +144,6 @@ func (api *API) SetAuthType(authType int) {
 	api.authType = authType
 }
 
-// ZoneIDByName retrieves a zone's ID from the name.
-func (api *API) ZoneIDByName(zoneName string) (string, error) {
-	zoneName = normalizeZoneName(zoneName)
-	res, err := api.ListZonesContext(context.Background(), WithZoneFilters(zoneName, api.AccountID, ""))
-	if err != nil {
-		return "", fmt.Errorf("ListZonesContext command failed: %w", err)
-	}
-
-	switch len(res.Result) {
-	case 0:
-		return "", errors.New("zone could not be found")
-	case 1:
-		return res.Result[0].ID, nil
-	default:
-		return "", errors.New("ambiguous zone name; an account ID might help")
-	}
-}
-
 // makeRequest makes a HTTP request and returns the body as a byte slice,
 // closing it before returning. params will be serialized to JSON.
 func (api *API) makeRequest(method, uri string, params interface{}) ([]byte, error) {
@@ -516,23 +498,6 @@ type ReqOption func(opt *reqOption)
 
 type reqOption struct {
 	params url.Values
-}
-
-// WithZoneFilters applies a filter based on zone properties.
-func WithZoneFilters(zoneName, accountID, status string) ReqOption {
-	return func(opt *reqOption) {
-		if zoneName != "" {
-			opt.params.Set("name", normalizeZoneName(zoneName))
-		}
-
-		if accountID != "" {
-			opt.params.Set("account.id", accountID)
-		}
-
-		if status != "" {
-			opt.params.Set("status", status)
-		}
-	}
 }
 
 // WithPagination configures the pagination for a response.
